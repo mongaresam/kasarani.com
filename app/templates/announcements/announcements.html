@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Announcements{% endblock %}
+{% block page_icon %}📢{% endblock %}
+{% block page_title %}School Announcements{% endblock %}
+{% block content %}
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap" class="fade-in">
+  <button class="btn btn-success" onclick="showToast('Announcement editor opened!','success')">+ Post Announcement</button>
+  <button class="btn btn-danger" onclick="sendEmergencyAlert()">🚨 Emergency Alert</button>
+  <div class="chip-bar" style="margin-bottom:0;margin-left:8px">
+    {% for cat in ['All','Academic','General','Special Event','Library','Sports'] %}
+    <button class="chip {% if cat=='All' %}active{% endif %}" data-group="ann" data-val="{{ cat }}"
+            onclick="chipFilter(this,'ann',null)">{{ cat }}</button>
+    {% endfor %}
+  </div>
+</div>
+{% for a in announcements %}
+<div class="announcement-card {% if a.urgent %}urgent{% endif %} fade-in">
+  <div class="ann-header">
+    {% if a.urgent %}<span class="badge badge-red">🚨 URGENT</span>{% endif %}
+    <span class="badge badge-sky">{{ a.type }}</span>
+    <span class="ann-date">{{ a.date }}</span>
+  </div>
+  <div class="ann-title">{{ a.title }}</div>
+  <div class="ann-body">{{ a.body }}</div>
+  <div style="margin-top:12px;display:flex;gap:8px">
+    <button class="btn-sky-ghost" onclick="showToast('Pinned to noticeboard!','success')">📌 Pin</button>
+    <button class="btn-sky-ghost" onclick="showToast('Shared via SMS!','info')">📱 SMS</button>
+    <button class="btn-sky-ghost" onclick="showToast('Shared via email!','info')">✉️ Email</button>
+  </div>
+</div>
+{% endfor %}
+<!-- Additional sample announcements -->
+{% for title,date,type,body in [
+  ('Inter-Schools Sports Day — June 14','10 May 2026','Sports','KTSSD will host the Annual Inter-Schools Sports Day for special needs schools. All students to participate.'),
+  ('Term 2 Exam Timetable Released','8 May 2026','Academic','The official end-of-term examination timetable is now available in the portal and on the main noticeboard.'),
+  ('ICT Lab Booking System Live','5 May 2026','ICT','Teachers can now book ICT lab sessions online through the portal. Walk-ins will not be accommodated on booked slots.'),
+] %}
+<div class="announcement-card fade-in">
+  <div class="ann-header">
+    <span class="badge badge-sky">{{ type }}</span>
+    <span class="ann-date">{{ date }}</span>
+  </div>
+  <div class="ann-title">{{ title }}</div>
+  <div class="ann-body">{{ body }}</div>
+</div>
+{% endfor %}
+{% endblock %}

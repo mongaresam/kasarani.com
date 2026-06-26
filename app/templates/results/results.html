@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}KCSE & Results{% endblock %}
+{% block page_icon %}🎯{% endblock %}
+{% block page_title %}KCSE & Results Portal{% endblock %}
+
+{% block content %}
+
+<!-- Header Banner -->
+<div style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--sky-dark) 100%);
+            border-radius:var(--radius);padding:24px 28px;margin-bottom:24px;
+            display:flex;align-items:center;gap:20px;" class="fade-in">
+  <span style="font-size:54px">🎓</span>
+  <div style="flex:1">
+    <div style="color:var(--sky);font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">
+      Kenya Certificate of Secondary Education
+    </div>
+    <div style="color:#fff;font-size:22px;font-weight:900;margin-bottom:2px">KCSE Results Portal</div>
+    <div style="color:#94A3B8;font-size:12px">Kasarani Treeside Secondary School for the Deaf · KNEC Registered</div>
+  </div>
+  <div style="text-align:right">
+    <div style="color:#fff;font-weight:900;font-size:30px">B− / 7.3</div>
+    <div style="color:var(--sky);font-size:12px;font-weight:600">2024 School Mean Grade</div>
+    <div style="color:#94A3B8;font-size:11px">Rank: 3rd in County</div>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar fade-in-d1">
+  <button class="tab-btn active" onclick="switchTab(this,'tab-slip')">📄 Result Slip</button>
+  <button class="tab-btn" onclick="switchTab(this,'tab-class')">📊 Class Results</button>
+  <button class="tab-btn" onclick="switchTab(this,'tab-trend')">📈 Trend Analysis</button>
+</div>
+
+<!-- ══ RESULT SLIP ══ -->
+<div class="tab-pane active" id="tab-slip">
+  <div class="grid-2 fade-in-d1">
+
+    <!-- Slip Card -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-weight:800;font-size:16px;color:var(--text)">{{ u.name }}</div>
+          <div style="color:var(--text-sec);font-size:12px" class="mono">{{ u.id }}</div>
+          <div style="color:var(--text-sec);font-size:12px">{{ u.dept }}</div>
+        </div>
+        <button class="btn btn-success" onclick="downloadPDF('KCSE Result Slip')">⬇️ Download PDF</button>
+      </div>
+
+      <!-- Grade Box -->
+      <div class="result-grade-box">
+        <div class="result-grade">B</div>
+        <div class="result-points">{{ total }} Points &nbsp;·&nbsp; Mean: {{ mean }} &nbsp;·&nbsp; Rank: 3 / 14</div>
+        <div style="margin-top:8px">
+          <span class="badge badge-green">University Entry Qualified</span>
+        </div>
+      </div>
+
+      <!-- Subject Table -->
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Subject</th><th>Teacher</th><th>Grade</th><th>Points</th><th>Remarks</th></tr></thead>
+          <tbody>
+            {% for s in kcse %}
+            <tr>
+              <td style="font-weight:700">{{ s.subject }}</td>
+              <td class="text-sec">{{ s.teacher }}</td>
+              <td>
+                <span class="badge {% if s.points >= 8 %}badge-green{% elif s.points >= 6 %}badge-sky{% else %}badge-amber{% endif %}">
+                  {{ s.grade }}
+                </span>
+              </td>
+              <td style="font-weight:800;color:var(--text)">{{ s.points }}</td>
+              <td style="color:{% if s.points >= 8 %}var(--green){% elif s.points >= 6 %}var(--sky-dark){% else %}var(--amber){% endif %};font-size:11px;font-weight:700">
+                {% if s.points >= 8 %}Excellent{% elif s.points >= 6 %}Good{% elif s.points >= 5 %}Average{% else %}Needs Improvement{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Comments -->
+      <div style="margin-top:16px;padding:14px;background:var(--card2);border-radius:10px;border-left:3px solid var(--sky)">
+        <div style="color:var(--text-sec);font-size:11px;font-weight:700;margin-bottom:6px">🖊️ Principal's Comment:</div>
+        <div style="color:var(--text);font-size:13px;font-style:italic;line-height:1.65">
+          "{{ u.name.split()[0] }} has shown remarkable improvement in Sciences and Mathematics.
+          With continued dedication, she is well-positioned for university admission.
+          Keep up the excellent work." — Mr. Patrick Muriithi, Principal
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics -->
+    <div>
+      <div class="card mb-4">
+        <div class="card-header"><div class="card-title">📊 Subject Performance Breakdown</div></div>
+        <div class="chart-container"><canvas id="slipChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📈 Historical Performance</div></div>
+        <div class="chart-container-sm"><canvas id="histChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CLASS RESULTS ══ -->
+<div class="tab-pane" id="tab-class">
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title">👥 Form 4 KCSE Candidates — 2024</div>
+      <div style="display:flex;gap:8px">
+        <select class="form-control" style="width:auto;padding:6px 12px;font-size:12px">
+          <option>Form 4</option><option>Form 3</option><option>Form 2</option><option>Form 1</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="downloadPDF('Class Results')">⬇️ Export</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Adm. No</th><th>Name</th><th>Math</th><th>English</th><th>Biology</th><th>Mean</th><th>Grade</th><th>Position</th></tr></thead>
+        <tbody>
+          {% for row in [
+            (1,'KT2024/F/002','Sharon Wambui',8,7,8,8.1,'A-',1),
+            (2,'KT2024/M/001','Brian Otieno',7,6,8,7.2,'B+',2),
+            (3,'KT2024/F/004','Amina Hassan',7,6,8,7.5,'B+',3),
+            (4,'KT2024/M/003','Kevin Mutua',7,6,7,6.8,'B',4),
+            (5,'KT2024/M/005','James Kipchoge',6,5,7,6.5,'B-',5),
+            (6,'KT2024/F/006','Rose Njoroge',8,7,8,7.8,'B+',6),
+          ] %}
+          <tr>
+            <td class="text-sec">{{ row[0] }}</td>
+            <td class="mono text-sec">{{ row[1] }}</td>
+            <td style="font-weight:700">{{ row[2] }}</td>
+            <td>{{ row[3] }}</td><td>{{ row[4] }}</td><td>{{ row[5] }}</td>
+            <td style="font-weight:800;color:var(--text)">{{ row[6] }}</td>
+            <td><span class="badge {% if row[7][0] == 'A' %}badge-green{% elif row[7][0] == 'B' %}badge-sky{% else %}badge-amber{% endif %}">{{ row[7] }}</span></td>
+            <td style="font-weight:700;color:var(--text-sec)">{{ row[8] }}/14</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TREND ANALYSIS ══ -->
+<div class="tab-pane" id="tab-trend">
+  <div class="grid-2 fade-in">
+    <div class="card">
+      <div class="card-header"><div class="card-title">📉 Year-on-Year KCSE Trend</div></div>
+      <div class="chart-container"><canvas id="trendChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">🏆 Grade Distribution — 2024</div></div>
+      <div class="chart-container"><canvas id="gradeChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const KCSE = {{ kcse|tojson }};
+
+makeBarChart('slipChart',
+  KCSE.map(k=>k.subject),
+  KCSE.map(k=>k.points),
+  KCSE.map(k => k.points>=8?'#16A34A':k.points>=6?'#0EA5E9':'#D97706')
+);
+
+makeLineChart('histChart',
+  ['F1T1','F1T2','F2T1','F2T2','F3T1','F3T2'],
+  [6.0,6.3,6.7,7.0,7.2,7.5],
+  'Mean Grade'
+);
+
+makeLineChart('trendChart',
+  ['2018','2019','2020','2021','2022','2023','2024'],
+  [5.8,6.1,6.4,6.8,7.0,7.1,7.3],
+  'KTSSD Mean'
+);
+
+makeDoughnutChart('gradeChart',
+  ['A / A-','B+/B/B-','C+/C/C-','D+/D/D-'],
+  [2, 8, 3, 1]
+);
+</script>
+{% endblock %}

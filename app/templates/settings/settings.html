@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_icon %}⚙️{% endblock %}
+{% block page_title %}Settings & Accessibility{% endblock %}
+{% block content %}
+<div class="grid-2 fade-in">
+
+  <!-- Accessibility -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">♿ Accessibility Options</div></div>
+    <div class="sn-panel" style="margin-bottom:16px">
+      🦻 KTSSD ERP is fully optimized for hearing-impaired learners. Visual alerts, captioned interfaces,
+      and large icon navigation are active system-wide.
+    </div>
+    {% for label,desc,id in [
+      ('🌙 Dark Mode','Reduces eye strain in low-light environments','toggle-dark'),
+      ('🎨 High Contrast Mode','Enhanced color contrast for better visibility','toggle-hc'),
+      ('🔤 Large Font Mode','Increases base font size for easier reading','toggle-lf'),
+      ('🔔 Visual Notifications','Flash-based alerts instead of sounds','toggle-vis'),
+      ('⌨️ Keyboard Navigation','Enhanced keyboard-only navigation mode','toggle-kb'),
+    ] %}
+    <div class="toggle-wrap">
+      <div class="toggle-info">
+        <div class="toggle-label">{{ label }}</div>
+        <div class="toggle-desc">{{ desc }}</div>
+      </div>
+      <div class="toggle {% if id=='toggle-dark' %}on{% endif %}" id="{{ id }}" data-label="{{ label }}" onclick="toggleSwitch(this)"></div>
+    </div>
+    {% endfor %}
+
+    <div style="margin-top:18px">
+      <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:12px">🔊 Visual Alert Style</div>
+      {% for opt in ['Flash Border Alert','Color Banner at Top','Icon + Screen Pulse','Full Screen Flash'] %}
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:pointer">
+        <input type="radio" name="alertStyle" {% if loop.first %}checked{% endif %} style="accent-color:var(--sky-dark)"/>
+        <span style="color:var(--text);font-size:13px">{{ opt }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Account Settings -->
+  <div>
+    <div class="card mb-4">
+      <div class="card-header"><div class="card-title">👤 Account Information</div></div>
+      <div style="display:flex;gap:14px;align-items:center;padding:14px;background:var(--card2);border-radius:10px;margin-bottom:18px">
+        <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--sky-dark));
+             display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">
+          {{ u.icon }}
+        </div>
+        <div>
+          <div style="font-weight:800;font-size:16px;color:var(--text)">{{ u.name }}</div>
+          <div style="color:var(--sky-dark);font-size:12px;font-weight:600">{{ u.role }} · {{ u.dept }}</div>
+          <div class="mono" style="color:var(--text-sec)">{{ u.id }}</div>
+        </div>
+      </div>
+      {% for k,v in [
+        ('Full Name', u.name),
+        ('Role', u.role),
+        ('Department', u.dept),
+        ('User ID', u.id),
+        ('Email', u.id.lower().replace('/','_') + '@ktssd.sc.ke'),
+        ('Institution', 'Kasarani Treeside S.S. for the Deaf'),
+        ('Location', 'Nairobi, Kenya'),
+      ] %}
+      <div class="kv-row"><span class="kv-key">{{ k }}</span><span class="kv-val">{{ v }}</span></div>
+      {% endfor %}
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><div class="card-title">🔐 Security</div></div>
+      {% for label,sub in [
+        ('Change Password','Last changed: 30 days ago'),
+        ('Two-Factor Authentication','Not enabled — click to enable'),
+        ('Active Sessions','1 active session'),
+        ('Download Activity Log','Last 30 days of activity'),
+      ] %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:600;font-size:13px;color:var(--text)">{{ label }}</div>
+          <div style="font-size:11px;color:var(--text-sec)">{{ sub }}</div>
+        </div>
+        <button class="btn-sky-ghost" onclick="showToast('{{ label }} — action initiated','info')">Manage</button>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="showToast('Settings saved!','success')">💾 Save Settings</button>
+      <a href="/logout" class="btn btn-danger" style="flex:1;text-align:center;text-decoration:none">🚪 Sign Out</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

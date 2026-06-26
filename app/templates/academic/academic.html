@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}Academics{% endblock %}
+{% block page_icon %}📊{% endblock %}
+{% block page_title %}Academic Management{% endblock %}
+
+{% block content %}
+
+<!-- Tab Bar -->
+<div class="tab-bar fade-in">
+  <button class="tab-btn active" onclick="switchTab(this,'tab-cbc')">📗 CBC / CBE Curriculum</button>
+  <button class="tab-btn" onclick="switchTab(this,'tab-844')">📘 8-4-4 / KCSE</button>
+</div>
+
+<!-- ══ CBC TAB ══ -->
+<div class="tab-pane active fade-in-d1" id="tab-cbc">
+
+  <div class="grid-4 mb-6">
+    {% for label,val,icon in [('CBC Learners','42','📚'),('Pathways Active','3','🛤️'),('Competency Reports','126','📋'),('Assessment Tasks','18','✏️')] %}
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(56,189,248,.12)">{{ icon }}</div>
+      <div><div class="stat-label">{{ label }}</div><div class="stat-value">{{ val }}</div></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="grid-2 mb-6">
+
+    <!-- CBC Radar Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📐 Competency Radar — Amina Hassan (Form 3A)</div>
+        <span class="badge badge-green">CBE</span>
+      </div>
+      <div class="chart-container"><canvas id="radarChart"></canvas></div>
+    </div>
+
+    <!-- Learning Areas -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🛤️ Learning Areas &amp; Performance Levels</div>
+        <a href="#" class="btn-sky-ghost" onclick="showToast('Generating report…','info');return false">📄 Export</a>
+      </div>
+      {% for c in cbc %}
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-weight:700;font-size:12px;color:var(--text)">{{ c.area }}</span>
+          <span style="font-size:11px;font-weight:800;
+            color:{% if c.level=='Exceeding' %}var(--green){% elif c.level=='Meeting' %}var(--sky-dark){% else %}var(--amber){% endif %}">
+            {{ c.level }} ({{ c.score }}%)
+          </span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill {% if c.level=='Exceeding' %}pf-green{% elif c.level=='Meeting' %}pf-sky{% else %}pf-amber{% endif %}"
+               style="width:{{ c.score }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <!-- Assessment Tasks Table -->
+  <div class="card fade-in-d2">
+    <div class="card-header">
+      <div class="card-title">📋 Continuous Assessment Tasks</div>
+      <button class="btn btn-success btn-sm" onclick="showToast('New task created!','success')">+ New Task</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Task</th><th>Learning Area</th><th>Due Date</th>
+            <th>Submitted</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in [
+            ('Science Project – Ecosystem','Sciences','25 May','42/56','Active'),
+            ('Math Portfolio','Mathematics','30 May','38/56','Active'),
+            ('Sign Language Presentation','Languages','1 Jun','15/56','Upcoming'),
+            ('Creative Arts Exhibition','Creative Arts','10 Jun','—','Upcoming'),
+            ('Social Studies Field Report','Social Studies','15 Jun','—','Upcoming')
+          ] %}
+          <tr>
+            <td style="font-weight:700">{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td><span class="badge {% if row[4]=='Active' %}badge-green{% else %}badge-amber{% endif %}">{{ row[4] }}</span></td>
+            <td>
+              <button class="btn-sky-ghost" onclick="showToast('Opening task: {{ row[0] }}','info')">View</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 8-4-4 TAB ══ -->
+<div class="tab-pane" id="tab-844">
+
+  <div class="grid-4 mb-6">
+    {% for label,val,icon in [('KCSE Candidates','14','🎓'),('Subjects Offered','11','📘'),('2024 Mean Grade','B−','🏆'),('A–C+ Passes','71%','✅')] %}
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(15,45,94,.12)">{{ icon }}</div>
+      <div><div class="stat-label">{{ label }}</div><div class="stat-value">{{ val }}</div></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="grid-2 mb-6">
+    <!-- KCSE Bar Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📊 Subject Performance — Term 2 CAT</div>
+        <span class="badge badge-navy">Form 4</span>
+      </div>
+      <div class="chart-container"><canvas id="kcseChart"></canvas></div>
+    </div>
+
+    <!-- CAT Comparison -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📈 CAT 1 vs CAT 2 Comparison</div>
+        <span class="badge badge-sky">Form 4</span>
+      </div>
+      <div class="chart-container"><canvas id="catChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Subject Table -->
+  <div class="card fade-in-d2">
+    <div class="card-header">
+      <div class="card-title">📝 Subject Results — Form 4, Term 2 CAT</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="showToast('Results locked!','success')">🔒 Lock Results</button>
+        <button class="btn btn-outline btn-sm" onclick="downloadPDF('CAT Results')">⬇️ Export PDF</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Subject</th><th>Teacher</th><th>Class Avg</th><th>Mean Grade</th><th>Top Score</th><th>Pass Rate</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for s in kcse %}
+          <tr>
+            <td style="font-weight:700">{{ s.subject }}</td>
+            <td class="text-sec">{{ ['Wanjiku','Ouma','Muthoni','Ochieng','Ngugi','Kariuki','Atieno','Rotich'][loop.index0] }}</td>
+            <td>{{ (s.points * 10 + 2)|round(1) }}%</td>
+            <td><span class="badge {% if s.points >= 7 %}badge-green{% elif s.points >= 5 %}badge-sky{% else %}badge-amber{% endif %}">{{ s.grade }}</span></td>
+            <td>{{ (s.points * 10 + 8) }}%</td>
+            <td>
+              <div class="inv-bar-wrap">
+                <div class="inv-bar"><div class="inv-fill pf-sky" style="width:{{ (s.points/10*100)|int }}%"></div></div>
+                <span style="font-size:10px;color:var(--text-sec);white-space:nowrap">{{ (s.points/10*100)|int }}%</span>
+              </div>
+            </td>
+            <td><span class="badge badge-green">Approved</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// CBC Radar
+const KCSE = {{ kcse_json|safe }};
+const CBC  = {{ cbc_json|safe }};
+
+// Radar via Chart.js
+(function(){
+  const ctx = document.getElementById('radarChart');
+  if (!ctx) return;
+  const d = chartDefaults();
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: CBC.map(c => c.area),
+      datasets:[{
+        label:'Competency',
+        data: CBC.map(c => c.score),
+        borderColor:'#0EA5E9',
+        backgroundColor:'rgba(14,165,233,0.18)',
+        borderWidth:2,
+        pointBackgroundColor:'#0EA5E9',
+        pointRadius:4,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{
+        grid:{color:d.grid},
+        ticks:{color:d.color,font:{size:9},backdropColor:'transparent'},
+        pointLabels:{color:d.color,font:{size:10}}
+      }}
+    }
+  });
+})();
+
+makeBarChart('kcseChart',
+  KCSE.map(k=>k.subject),
+  KCSE.map(k=>k.points),
+  ['#0F2D5E','#1E3A8A','#1D4ED8','#2563EB','#3B82F6','#60A5FA','#93C5FD','#BAE6FD']
+);
+
+// CAT comparison
+(function(){
+  const ctx = document.getElementById('catChart');
+  if (!ctx) return;
+  const d = chartDefaults();
+  new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:KCSE.map(k=>k.subject),
+      datasets:[
+        {label:'CAT 1',data:KCSE.map(k=>k.points-0.5),backgroundColor:'rgba(56,189,248,0.6)',borderRadius:4,borderSkipped:false},
+        {label:'CAT 2',data:KCSE.map(k=>k.points+0.3),backgroundColor:'rgba(15,45,94,0.75)',borderRadius:4,borderSkipped:false}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:d.color,font:{size:10}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:d.color,font:{size:9}}},
+        y:{grid:{color:d.grid},ticks:{color:d.color,font:{size:10}},min:0,max:10}
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

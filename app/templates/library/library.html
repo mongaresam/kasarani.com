@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Library & Resources{% endblock %}
+{% block page_icon %}📚{% endblock %}
+{% block page_title %}Library & Resource Management{% endblock %}
+
+{% block content %}
+
+<!-- Stats -->
+<div class="grid-5 mb-6 fade-in">
+  {% for label,val,icon,color in [
+    ('Total Resources','842','📦','var(--navy)'),
+    ('Currently Issued','68','📤','var(--amber)'),
+    ('Available Now','774','✅','var(--green)'),
+    ('Overdue Tracked','5','⏰','var(--purple)'),
+    ('Low Stock Alerts','3','⚠️','var(--red)')
+  ] %}
+  <div class="stat-card" style="border-top:3px solid {{ color }}">
+    <div class="stat-icon" style="background:{{ color }}22">{{ icon }}</div>
+    <div><div class="stat-label">{{ label }}</div><div class="stat-value">{{ val }}</div></div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Action Bar -->
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center" class="fade-in-d1">
+  <button class="btn btn-success" onclick="showToast('Resource issue form opened!','success')">📤 Issue Resource</button>
+  <button class="btn btn-primary" onclick="showToast('Return recorded successfully!','success')">↩ Record Return</button>
+  <button class="btn btn-outline" onclick="showToast('QR Code generated!','info')">📱 Generate QR Code</button>
+  <button class="btn btn-outline" onclick="showToast('Barcode printed!','info')">🏷️ Print Barcode</button>
+  <button class="btn btn-outline" onclick="downloadPDF('Library Report')">📄 Export Report</button>
+  <div style="margin-left:auto">
+    <input class="form-control" type="text" placeholder="🔍 Search resources…"
+           style="width:220px" oninput="searchInventory(this.value)" id="inv-search"/>
+  </div>
+</div>
+
+<!-- Category Chips -->
+<div class="chip-bar fade-in-d1" id="cat-chips">
+  {% for cat in ['All','Textbook','Revision','SL Material','ICT Device','Lab Equipment','Sports','Office Supply','AV Equipment'] %}
+  <button class="chip {% if cat=='All' %}active{% endif %}"
+          data-group="cat" data-val="{{ cat }}"
+          onclick="chipFilter(this,'cat',filterInventory)">{{ cat }}</button>
+  {% endfor %}
+</div>
+
+<!-- Inventory Table -->
+<div class="card fade-in-d2">
+  <div class="card-header">
+    <div class="card-title">📋 Resource Inventory</div>
+    <span class="badge badge-navy">{{ inventory|length }} Items</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Resource Name</th><th>Category</th>
+          <th>Total</th><th>Issued</th><th>Available</th>
+          <th>Availability</th><th>Condition</th><th>Department</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in inventory %}
+        <tr class="inv-row" data-cat="{{ item.category }}" data-name="{{ item.name }}">
+          <td class="mono text-sec">{{ item.id }}</td>
+          <td style="font-weight:700">{{ item.name }}</td>
+          <td>
+            <span class="badge
+              {% if item.category=='SL Material' %}badge-purple
+              {% elif item.category=='ICT Device' %}badge-navy
+              {% elif item.category=='Lab Equipment' %}badge-sky
+              {% elif item.category=='Sports' %}badge-green
+              {% else %}badge-grey{% endif %}">
+              {{ item.category }}
+            </span>
+          </td>
+          <td class="text-bold text-center">{{ item.qty }}</td>
+          <td style="text-align:center;color:var(--amber);font-weight:700">{{ item.issued }}</td>
+          <td style="text-align:center;font-weight:800;color:{% if item.available <= 2 %}var(--red){% elif item.available <= 5 %}var(--amber){% else %}var(--green){% endif %}">
+            {{ item.available }}
+          </td>
+          <td style="min-width:100px">
+            <div class="inv-bar-wrap">
+              <div class="inv-bar">
+                <div class="inv-fill {% if item.available/item.qty > 0.5 %}pf-green{% elif item.available/item.qty > 0.2 %}pf-amber{% else %}pf-red{% endif %}"
+                     style="width:{{ ((item.available/item.qty)*100)|int }}%"></div>
+              </div>
+              <span style="font-size:9px;color:var(--text-sec);white-space:nowrap">
+                {{ ((item.available/item.qty)*100)|int }}%
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="badge {% if item.condition=='Good' %}badge-green{% elif item.condition=='New' %}badge-sky{% else %}badge-amber{% endif %}">
+              {{ item.condition }}
+            </span>
+          </td>
+          <td class="text-sec">{{ item.dept }}</td>
+          <td>
+            <div style="display:flex;gap:5px">
+              <button class="btn-sky-ghost" onclick="showToast('{{ item.name }} issued!','success')">Issue</button>
+              <button class="btn-sky-ghost" onclick="showToast('Return recorded!','info')">Return</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="no-fines-note">
+    ℹ️ No fines or penalties are applied for overdue materials. Overdue items are tracked for planning and follow-up purposes only.
+  </div>
+</div>
+
+<!-- Issued This Week -->
+<div class="grid-2 mt-4 fade-in-d3" style="margin-top:20px">
+  <div class="card">
+    <div class="card-header"><div class="card-title">📤 Recently Issued</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Resource</th><th>Issued To</th><th>Date</th><th>Due Back</th></tr></thead>
+        <tbody>
+          {% for row in [
+            ('KCSE Math Topical','Brian Otieno (F4A)','19 May','End of Term'),
+            ('Biology Form 4','Sharon Wambui (F4A)','19 May','End of Term'),
+            ('Dell Laptop #5','Mr. Ochieng (HOD)','18 May','22 May'),
+            ('Epson Projector','Science Lab','17 May','Return when done'),
+            ('KSL Chart Set','Form 3A Classroom','15 May','End of Term'),
+          ] %}
+          <tr>
+            <td style="font-weight:700">{{ row[0] }}</td>
+            <td class="text-sec">{{ row[1] }}</td>
+            <td class="text-sec">{{ row[2] }}</td>
+            <td><span class="badge badge-sky">{{ row[3] }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">📊 Resource Usage by Category</div></div>
+    <div class="chart-container"><canvas id="libChart"></canvas></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+makeDoughnutChart('libChart',
+  ['Textbooks','Revision Books','SL Materials','ICT Devices','Lab Equipment','Sports','Others'],
+  [35, 20, 12, 8, 10, 7, 8]
+);
+</script>
+{% endblock %}

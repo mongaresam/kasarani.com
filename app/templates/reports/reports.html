@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Reports & Analytics{% endblock %}
+{% block page_icon %}📈{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+{% block content %}
+
+<div class="grid-2 mb-6 fade-in">
+  <!-- Available Reports -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">📄 Available Reports</div><button class="btn btn-primary btn-sm" onclick="showToast('Generating new report…','info')">+ Generate</button></div>
+    {% for name,rtype,fmt,size in [
+      ('KCSE 2024 Full Report','Academic','PDF','2.4 MB'),
+      ('Term 1 Attendance Report','Attendance','Excel','1.1 MB'),
+      ('Library Resource Usage','Library','PDF','890 KB'),
+      ('CBC Competency Summary','Academic','PDF','1.8 MB'),
+      ('Inventory Audit Report','Store','Excel','750 KB'),
+      ('Staff Performance Q1','HR','PDF','1.2 MB'),
+      ('Department Analysis','Academic','PDF','980 KB'),
+    ] %}
+    <div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:20px">{% if fmt=='PDF' %}📄{% else %}📊{% endif %}</span>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:12px;color:var(--text)">{{ name }}</div>
+        <div style="font-size:11px;color:var(--text-sec)">{{ rtype }} · {{ fmt }} · {{ size }}</div>
+      </div>
+      <button class="btn-sky-ghost" onclick="downloadPDF('{{ name }}')">⬇️ Download</button>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- AI Insights -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">🤖 AI Predictive Insights</div><span class="badge badge-purple">AI</span></div>
+    <div class="ai-card ai-card-perf">
+      <div class="ai-card-title" style="color:var(--sky-dark)">📈 Performance Forecast — Form 4 KCSE 2026</div>
+      <div class="ai-card-body">
+        Based on current CAT performance and historical trends:<br/>
+        • <strong style="color:var(--green)">Projected Mean: B (7.5–8.0 pts)</strong><br/>
+        • Mathematics trending upward (+12% improvement)<br/>
+        • 4 students projected for direct university entry<br/>
+        • Biology and Chemistry need targeted intervention
+      </div>
+    </div>
+    <div class="ai-card ai-card-inv">
+      <div class="ai-card-title" style="color:var(--amber)">📦 Smart Inventory Forecast</div>
+      <div class="ai-card-body">
+        AI-predicted stock needs for Term 2:<br/>
+        • Order 15 additional Mathematics textbooks<br/>
+        • Microscope slides needed before May 28<br/>
+        • 3 laptops require servicing before mock exams<br/>
+        • Whiteboard markers running low — reorder now
+      </div>
+    </div>
+    <div class="ai-card ai-card-att">
+      <div class="ai-card-title" style="color:var(--green)">👥 Attendance Pattern Analysis</div>
+      <div class="ai-card-body">
+        Smart attendance insights this term:<br/>
+        • Monday mornings show 3% attendance dip<br/>
+        • Recommend engaging visual activities on Mondays<br/>
+        • 2 students flagged for pastoral follow-up support<br/>
+        • Overall rate 94.2% — above national average
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="grid-2 fade-in-d1">
+  <div class="card">
+    <div class="card-header"><div class="card-title">📉 Year-on-Year KCSE Performance</div></div>
+    <div class="chart-container"><canvas id="yearChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">🏛️ Department Comparison</div></div>
+    <div class="chart-container"><canvas id="deptChart"></canvas></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const YEARLY = {{ yearly_json|safe }};
+makeLineChart('yearChart', YEARLY.map(y=>y.year), YEARLY.map(y=>y.mean), 'KTSSD Mean Grade');
+makeBarChart('deptChart',
+  ['Sciences','Humanities','Languages','Technical','Arts','Maths'],
+  [6.8, 7.2, 6.5, 6.9, 7.5, 7.1],
+  ['#0F2D5E','#1E3A8A','#1D4ED8','#0EA5E9','#38BDF8','#7C3AED']
+);
+</script>
+{% endblock %}

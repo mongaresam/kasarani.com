@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_icon %}🏠{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Hero Banner -->
+<div class="hero-banner fade-in">
+  <img src="https://ktschoolforthedeaf.sc.ke/wp-content/uploads/2024/07/cropped-cropped-Edited-Logo.png"
+       alt="KTSSD" class="hero-logo"
+       onerror="this.outerHTML='<div style=\'width:70px;height:70px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px\'>🏫</div>'"/>
+  <div class="hero-body">
+    <div class="hero-school">KASARANI TREESIDE SECONDARY SCHOOL FOR THE DEAF</div>
+    <div class="hero-greeting">Good Morning, {{ u.name.split()[0] }}! 👋</div>
+    <div class="hero-meta">{{ u.role }} &nbsp;·&nbsp; {{ u.dept }} &nbsp;·&nbsp;
+      <script>document.write(new Date().toLocaleDateString('en-KE',{weekday:'long',year:'numeric',month:'long',day:'numeric'}))</script>
+    </div>
+  </div>
+  <div class="hero-side">
+    <div class="hero-term">Term 1, 2026</div>
+    <div class="hero-week">Week 8 of 14</div>
+    <span class="badge badge-red pulse">🔔 2 Urgent Alerts</span>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid-auto mb-6 fade-in-d1">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(56,189,248,.12)">🧑‍🎓</div>
+    <div><div class="stat-label">Total Students</div><div class="stat-value">{{ stats.students }}</div><div class="stat-sub">17 Girls · 39 Boys</div><div class="stat-trend-up">▲ 5% this term</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(22,163,74,.12)">👨‍🏫</div>
+    <div><div class="stat-label">Teaching Staff</div><div class="stat-value">{{ stats.staff }}</div><div class="stat-sub">6 TSC · 6 BOM</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(124,58,237,.12)">📚</div>
+    <div><div class="stat-label">Library Resources</div><div class="stat-value">{{ stats.resources }}</div><div class="stat-sub">68 currently issued</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(217,119,6,.12)">🎯</div>
+    <div><div class="stat-label">KCSE Mean Grade</div><div class="stat-value">{{ stats.mean_grade }}</div><div class="stat-sub">Grade B− (2024)</div><div class="stat-trend-up">▲ 8% vs 2023</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(15,45,94,.12)">🏛️</div>
+    <div><div class="stat-label">Departments</div><div class="stat-value">{{ stats.depts }}</div><div class="stat-sub">Active departments</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(22,163,74,.12)">📊</div>
+    <div><div class="stat-label">Term Attendance</div><div class="stat-value">{{ stats.attendance }}</div><div class="stat-sub">Above national avg</div><div class="stat-trend-up">▲ 2% this term</div></div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid-2 mb-6 fade-in-d2">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📈 Academic Performance Trend</div>
+      <span class="badge badge-sky">8-4-4</span>
+    </div>
+    <div class="chart-container"><canvas id="perfChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🏛️ Department Mean Grades</div>
+      <span class="badge badge-navy">Term 1</span>
+    </div>
+    <div class="chart-container"><canvas id="deptChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Bottom Row -->
+<div class="grid-3 fade-in-d3">
+
+  <!-- Student Distribution -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">👥 Student Distribution</div></div>
+    <div class="chart-container-sm"><canvas id="distChart"></canvas></div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">⚡ Recent Activity</div></div>
+    {% for a in [
+      ("📖","KCSE Math paper issued to Form 4","09:15 AM"),
+      ("🧑‍🎓","New student profile created","08:50 AM"),
+      ("📦","Lab equipment allocated to Sciences","08:30 AM"),
+      ("📢","Mock exam timetable published","08:00 AM"),
+      ("💬","Message from Principal received","07:45 AM")
+    ] %}
+    <div class="activity-item">
+      <span style="font-size:17px;margin-top:1px">{{ a[0] }}</span>
+      <div class="activity-text">{{ a[1] }}</div>
+      <div class="activity-time">{{ a[2] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Announcements -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📢 Announcements</div>
+      <a href="/announcements" class="btn-sky-ghost">View All</a>
+    </div>
+    {% for a in announcements %}
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;flex-wrap:wrap">
+        {% if a.urgent %}<span class="badge badge-red">🚨 URGENT</span>{% endif %}
+        <span class="badge badge-sky">{{ a.type }}</span>
+        <span style="margin-left:auto;color:var(--text-sec);font-size:10px">{{ a.date }}</span>
+      </div>
+      <div style="color:var(--text);font-size:12px;font-weight:600">{{ a.title }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PERF = {{ perf|safe }};
+const perfLabels = PERF.map(p => p.term);
+const perfData   = PERF.map(p => p.mean);
+
+makeLineChart('perfChart', perfLabels, perfData, 'Mean Grade');
+
+makeBarChart('deptChart',
+  ['Sciences','Humanities','Languages','Technical','Arts'],
+  [6.8, 7.2, 6.5, 6.9, 7.5],
+  ['#0F2D5E','#1E3A8A','#1D4ED8','#0EA5E9','#38BDF8']
+);
+
+makeDoughnutChart('distChart',
+  ['Form 1','Form 2','Form 3','Form 4'],
+  [14, 15, 13, 14]
+);
+</script>
+{% endblock %}

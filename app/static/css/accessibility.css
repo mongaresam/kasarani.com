@@ -1,0 +1,115 @@
+/* ═══════════════════════════════════════════════════════════════
+   KTSSD ERP — Accessibility Overrides
+   FIX: Expanded from 2-line stub to full a11y stylesheet.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── High Contrast Mode ── */
+body.high-contrast {
+  --bg:      #000;
+  --card:    #0A0A0A;
+  --card2:   #111;
+  --text:    #FFFFFF;
+  --text-sec:#CCCCCC;
+  --border:  #555;
+  --sky:     #00D4FF;
+  --sky-dark:#00BFFF;
+  filter: none; /* Override the old filter:contrast(1.6) */
+}
+body.high-contrast .badge-sky  { background: #003050; color: #00D4FF; border: 1px solid #00D4FF; }
+body.high-contrast .btn-primary{ background: #00BFFF; color: #000; }
+body.high-contrast .stat-value { color: #FFFFFF; }
+body.high-contrast .nav-item.active { background: rgba(0,212,255,.25); }
+
+/* ── Large Font Mode ── */
+body.large-font { font-size: 1.18rem; }
+body.large-font .stat-value  { font-size: 30px; }
+body.large-font .nav-item    { font-size: 15px; }
+body.large-font th, body.large-font td { font-size: 14px; padding: 13px 14px; }
+body.large-font .card-title  { font-size: 16px; }
+body.large-font .badge       { font-size: 13px; padding: 4px 12px; }
+
+/* ── Focus styles (keyboard nav) ── */
+:focus-visible {
+  outline: 3px solid #0EA5E9;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 3px solid #0EA5E9;
+  outline-offset: 3px;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Skip to content link ── */
+.skip-link {
+  position: absolute;
+  top: -40px; left: 0;
+  background: var(--sky-dark);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 0 0 8px 0;
+  z-index: 10000;
+  font-weight: 700;
+  transition: top .2s;
+}
+.skip-link:focus { top: 0; }
+
+/* ── Visual alert banner ── */
+.alert-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 10000;
+  background: var(--red);
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 11px 20px;
+  animation: fadeInUp .3s ease;
+}
+.alert-banner.hidden { display: none; }
+
+/* ── Screen reader only ── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Deaf-learner visual cues ── */
+.visual-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.3);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sky-dark);
+}
+.deaf-accessible-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(56,189,248,.06);
+  border: 1px solid rgba(56,189,248,.15);
+  border-left: 3px solid var(--sky);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-sec);
+  line-height: 1.6;
+}

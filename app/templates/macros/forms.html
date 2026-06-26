@@ -1,0 +1,8 @@
+{# Reusable form field macros #}
+{% macro input_field(name, label, type='text', value='', placeholder='') %}
+<div class="form-group">
+  <label class="form-label">{{ label }}</label>
+  <input class="form-control" type="{{ type }}" name="{{ name }}"
+         value="{{ value }}" placeholder="{{ placeholder }}"/>
+</div>
+{% endmacro %}

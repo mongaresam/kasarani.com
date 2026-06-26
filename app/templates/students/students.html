@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block page_icon %}🧑‍🎓{% endblock %}
+{% block page_title %}Student Management{% endblock %}
+
+{% block content %}
+
+<!-- Stats -->
+<div class="grid-5 mb-6 fade-in">
+  {% for label,val,icon in [('Total Students','56','👥'),('Boys','39','👦'),('Girls','17','👧'),('Boarding','56','🏠'),('Profound HL','38','👂')] %}
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(56,189,248,.12)">{{ icon }}</div>
+    <div><div class="stat-label">{{ label }}</div><div class="stat-value">{{ val }}</div></div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Action Bar -->
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center" class="fade-in-d1">
+  <button class="btn btn-success" onclick="showToast('Admission form opened!','success')">+ Admit Student</button>
+  <button class="btn btn-primary" onclick="showToast('Timetable view opened!','info')">📅 View Timetable</button>
+  <button class="btn btn-outline" onclick="downloadPDF('Students Report')">⬇️ Export List</button>
+  <div style="margin-left:auto">
+    <input class="form-control" type="text" placeholder="🔍 Search students…"
+           style="width:220px" oninput="searchStudents(this.value)"/>
+  </div>
+</div>
+
+<div class="grid-2 fade-in-d1" style="gap:20px">
+
+  <!-- Student Table -->
+  <div class="card" style="grid-column:1/-1" id="student-table-card">
+    <div class="card-header">
+      <div class="card-title">👥 All Students</div>
+      <div style="display:flex;gap:8px">
+        <select class="form-control" style="width:auto;font-size:12px;padding:5px 10px">
+          <option>All Forms</option><option>Form 1</option><option>Form 2</option>
+          <option>Form 3</option><option>Form 4</option>
+        </select>
+        <select class="form-control" style="width:auto;font-size:12px;padding:5px 10px">
+          <option>All Streams</option><option>Stream A</option><option>Stream B</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Adm. No</th><th>Name</th><th>Form</th><th>Stream</th>
+            <th>Gender</th><th>County</th><th>Hearing Level</th><th>GPA</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+          <tr class="student-row" data-name="{{ s.name }}" style="cursor:pointer"
+              onclick="openProfile('{{ s.id }}','{{ s.name }}','{{ s.form }}','{{ s.stream }}','{{ s.gender }}','{{ s.county }}','{{ s.hearing }}','{{ s.gpa }}')">
+            <td class="mono text-sec">{{ s.id }}</td>
+            <td style="font-weight:700">{{ s.name }}</td>
+            <td><span class="badge badge-navy">{{ s.form }}</span></td>
+            <td class="text-sec">Stream {{ s.stream }}</td>
+            <td>{% if s.gender == 'F' %}👧 Female{% else %}👦 Male{% endif %}</td>
+            <td class="text-sec">{{ s.county }}</td>
+            <td>
+              <span class="badge {% if s.hearing=='Profound' %}badge-red{% elif s.hearing=='Severe' %}badge-amber{% else %}badge-sky{% endif %}">
+                {{ s.hearing }}
+              </span>
+            </td>
+            <td style="font-weight:800;color:{% if s.gpa >= 7.5 %}var(--green){% elif s.gpa >= 6.5 %}var(--sky-dark){% else %}var(--amber){% endif %}">
+              {{ s.gpa }}
+            </td>
+            <td>
+              <button class="btn-sky-ghost" onclick="event.stopPropagation();openProfile('{{ s.id }}','{{ s.name }}','{{ s.form }}','{{ s.stream }}','{{ s.gender }}','{{ s.county }}','{{ s.hearing }}','{{ s.gpa }}')">
+                View Profile
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profile-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+     display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
+  <div style="background:var(--card);border-radius:var(--radius);padding:28px;width:100%;max-width:680px;
+              max-height:90vh;overflow-y:auto;position:relative">
+    <button onclick="closeProfile()"
+            style="position:absolute;top:16px;right:16px;background:var(--card2);border:1px solid var(--border);
+                   border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:16px;
+                   color:var(--text-sec);display:flex;align-items:center;justify-content:center">✕</button>
+
+    <div class="grid-2" style="gap:20px">
+      <div>
+        <div class="profile-avi" id="p-avi">🧑‍🎓</div>
+        <div class="profile-name" id="p-name">—</div>
+        <div class="profile-id" id="p-id" style="text-align:center;margin-top:4px">—</div>
+        <div style="text-align:center;margin-top:8px" id="p-form-badge"></div>
+        <div style="margin-top:16px">
+          <div class="kv-row"><span class="kv-key">Form / Stream</span><span class="kv-val" id="p-form">—</span></div>
+          <div class="kv-row"><span class="kv-key">Gender</span><span class="kv-val" id="p-gender">—</span></div>
+          <div class="kv-row"><span class="kv-key">County of Origin</span><span class="kv-val" id="p-county">—</span></div>
+          <div class="kv-row"><span class="kv-key">Hearing Loss Level</span><span class="kv-val" id="p-hearing">—</span></div>
+          <div class="kv-row"><span class="kv-key">Boarding Status</span><span class="kv-val">Boarding 🏠</span></div>
+          <div class="kv-row"><span class="kv-key">Academic GPA</span><span class="kv-val" id="p-gpa">—</span></div>
+          <div class="kv-row"><span class="kv-key">Dormitory</span><span class="kv-val">Acacia House</span></div>
+          <div class="kv-row"><span class="kv-key">Guardian</span><span class="kv-val">Parent / Guardian</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sn-panel">
+          <div class="sn-title">🦻 Special Needs Support Plan</div>
+          {% for k,v in [
+            ('Hearing Aid','Yes – Behind-the-ear type'),
+            ('Sign Language Level','Advanced KSL'),
+            ('FM System Support','Yes – Active'),
+            ('Visual Alerts','Installed in classroom'),
+            ('Captioned Materials','Full access granted'),
+            ('Lip Reading Support','Yes'),
+            ('Individual Support Plan','Active – Updated 2026'),
+          ] %}
+          <div class="kv-row"><span class="kv-key">{{ k }}</span><span class="kv-val" style="color:var(--green)">{{ v }}</span></div>
+          {% endfor %}
+        </div>
+
+        <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:10px">📚 Borrowed Resources</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Date Issued</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for item,date in [('Mathematics Textbook','12 May'),('Biology Form 4','10 May'),('KSL Chart Set','8 May')] %}
+              <tr>
+                <td style="font-weight:600">{{ item }}</td>
+                <td class="text-sec">{{ date }}</td>
+                <td><span class="badge badge-amber">Borrowed</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="showToast('Academic transcript downloaded!','success')">📄 Transcript</button>
+          <button class="btn btn-outline btn-sm" onclick="showToast('Report form generated!','info')">📋 Report Form</button>
+          <button class="btn btn-outline btn-sm" onclick="closeProfile()">✕ Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openProfile(id, name, form, stream, gender, county, hearing, gpa) {
+  document.getElementById('p-name').textContent    = name;
+  document.getElementById('p-id').textContent      = id + ' · KTSSD';
+  document.getElementById('p-form').textContent    = form + ' – Stream ' + stream;
+  document.getElementById('p-gender').textContent  = gender === 'F' ? 'Female 👧' : 'Male 👦';
+  document.getElementById('p-county').textContent  = county + ' County';
+  document.getElementById('p-hearing').textContent = hearing + ' Hearing Loss';
+  document.getElementById('p-gpa').textContent     = gpa + ' pts';
+  document.getElementById('p-avi').textContent     = gender === 'F' ? '👩‍🎓' : '👨‍🎓';
+  document.getElementById('p-form-badge').innerHTML = `<span class="badge badge-sky">${form}</span>`;
+  const modal = document.getElementById('profile-modal');
+  modal.style.display = 'flex';
+}
+function closeProfile() {
+  document.getElementById('profile-modal').style.display = 'none';
+}
+</script>
+{% endblock %}

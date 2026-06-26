@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Timetable{% endblock %}
+{% block page_icon %}📅{% endblock %}
+{% block page_title %}School Timetable{% endblock %}
+{% block content %}
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:20px" class="fade-in">
+  <select class="form-control" style="width:auto">
+    <option>Form 3 – Stream A</option><option>Form 4 – Stream A</option>
+    <option>Form 2 – Stream A</option><option>Form 1 – Stream A</option>
+  </select>
+  <select class="form-control" style="width:auto"><option>Term 1, 2026</option><option>Term 2, 2026</option></select>
+  <button class="btn btn-outline btn-sm" onclick="downloadPDF('Timetable')">⬇️ Export PDF</button>
+</div>
+<div class="card fade-in-d1">
+  <div class="card-header"><div class="card-title">📅 Weekly Timetable — Form 3 Stream A</div><span class="badge badge-sky">2026</span></div>
+  <div class="table-wrap">
+    <table class="tt-table">
+      <thead>
+        <tr>
+          <th>Period / Time</th>
+          {% for d in ['Monday','Tuesday','Wednesday','Thursday','Friday'] %}<th>{{ d }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% set periods = [
+          ('7:30–8:30',  ['Mathematics','Biology','English','Chemistry','History']),
+          ('8:30–9:30',  ['English','Mathematics','Biology','Geography','Chemistry']),
+          ('9:30–10:30', ['Biology','English','Mathematics','Mathematics','Physics']),
+          ('10:30–11:00',['BREAK','BREAK','BREAK','BREAK','BREAK']),
+          ('11:00–12:00',['Physics','Chemistry','History','English','Mathematics']),
+          ('12:00–1:00', ['Chemistry','Kiswahili','Physics','Kiswahili','English']),
+          ('1:00–2:00',  ['LUNCH','LUNCH','LUNCH','LUNCH','LUNCH']),
+          ('2:00–3:00',  ['History','Geography','Chemistry','Biology','PE']),
+          ('3:00–4:00',  ['Geography','CRE','PE','Physics','Art & Design']),
+        ] %}
+        {% set colors = {
+          'Mathematics':'#0F2D5E','English':'#16A34A','Biology':'#0EA5E9',
+          'Physics':'#7C3AED','Chemistry':'#D97706','History':'#DC2626',
+          'Geography':'#0891B2','Kiswahili':'#7C3AED','CRE':'#059669',
+          'PE':'#DC2626','Art & Design':'#D97706'
+        } %}
+        {% for period, subjects in periods %}
+        <tr>
+          <td style="font-weight:700;font-size:10px;color:var(--text-sec);background:var(--card2);white-space:nowrap;padding:8px 12px">{{ period }}</td>
+          {% for subj in subjects %}
+          <td style="padding:8px 10px">
+            {% if subj in ['BREAK','LUNCH'] %}
+            <span class="tt-break">{{ subj }}</span>
+            {% else %}
+            <div class="tt-cell" style="background:{{ colors.get(subj,'#38BDF8') }}22;border-color:{{ colors.get(subj,'#38BDF8') }}44;color:{{ colors.get(subj,'#38BDF8') }}">
+              {{ subj }}
+            </div>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

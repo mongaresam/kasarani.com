@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — KTSSD ERP Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+</head>
+<body style="display:block;background:none">
+
+<div class="login-page">
+
+  <!-- Header -->
+  <div class="login-header fade-in">
+    <img src="https://ktschoolforthedeaf.sc.ke/wp-content/uploads/2024/07/cropped-cropped-Edited-Logo.png"
+         alt="KTSSD Logo" class="login-logo"
+         onerror="this.outerHTML='<div style=\'width:90px;height:90px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 6px 30px rgba(0,0,0,.4)\'>🏫</div>'"/>
+    <div>
+      <div class="login-school">KASARANI TREESIDE</div>
+      <div class="login-tagline">Secondary School for the Deaf</div>
+      <div class="login-sub">National Special Needs Institution · Nairobi, Kenya</div>
+    </div>
+  </div>
+
+  <!-- Login Box -->
+  <div class="login-box fade-in-d1">
+    <div class="login-title">🎓 KTSSD ERP Portal</div>
+    <div class="login-desc">School Management &amp; Academic System — Sign in to continue</div>
+
+    {% if error %}
+    <div style="background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);border-radius:10px;
+                padding:12px 16px;color:#FCA5A5;font-size:13px;font-weight:600;margin-bottom:16px;text-align:center">
+      ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}" id="login-form">
+      <!-- Step 1: Role Selection -->
+      <div id="step-1">
+        <div style="color:#94A3B8;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:12px">SELECT YOUR ROLE</div>
+        <div class="role-grid" id="role-grid">
+          {% for key, u in roles.items() %}
+          <div class="role-card" data-role="{{ key }}" onclick="selectRole('{{ key }}', this)">
+            <span class="role-ico">{{ u.icon }}</span>
+            <span class="role-name">{{ u.role }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="button" class="login-btn" onclick="goStep2()" style="margin-top:4px">
+          Continue →
+        </button>
+      </div>
+
+      <!-- Step 2: Credentials -->
+      <div id="step-2" style="display:none">
+        <div onclick="goStep1()" style="color:#38BDF8;cursor:pointer;font-size:13px;margin-bottom:20px;display:inline-flex;align-items:center;gap:6px;font-weight:600">
+          ← Change Role
+        </div>
+
+        <!-- Selected role preview -->
+        <div id="role-preview" style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);
+             border-radius:12px;padding:14px;margin-bottom:20px;display:flex;align-items:center;gap:14px">
+          <span id="preview-icon" style="font-size:30px"></span>
+          <div>
+            <div id="preview-name" style="color:#fff;font-weight:800;font-size:15px"></div>
+            <div id="preview-id" style="color:#38BDF8;font-size:11px;font-family:'Space Mono',monospace"></div>
+            <div id="preview-dept" style="color:#94A3B8;font-size:11px"></div>
+          </div>
+          <span class="badge badge-sky" style="margin-left:auto" id="preview-role-badge"></span>
+        </div>
+
+        <label class="login-form-label">Username / Admission Number</label>
+        <input class="login-input" type="text" name="username" id="inp-username" autocomplete="username"/>
+
+        <label class="login-form-label">Password</label>
+        <input class="login-input" type="password" name="password" id="inp-password" value="demo1234" autocomplete="current-password"/>
+
+        <input type="hidden" name="role" id="inp-role"/>
+
+        <button type="submit" class="login-btn">
+          🔐 Sign In to KTSSD Portal
+        </button>
+
+        <div class="login-secure">
+          🔒 JWT Authentication &nbsp;·&nbsp; Role-Based Access Control &nbsp;·&nbsp; Encrypted Sessions
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Accessibility note -->
+  <div style="margin-top:20px;display:flex;gap:20px;flex-wrap:wrap;justify-content:center">
+    {% for tag in ['🦻 Deaf-Accessible','📱 Mobile Ready','🤖 AI-Powered','🔒 Secure','🇰🇪 Kenyan CBC/KCSE'] %}
+    <span style="color:#334155;font-size:11px;font-weight:600">{{ tag }}</span>
+    {% endfor %}
+  </div>
+
+  <div class="login-footer">
+    © 2026 Kasarani Treeside Secondary School for the Deaf · Nairobi, Kenya<br/>
+    KTSSD ERP v2.0 — Empowering Deaf Learners for a Better Future
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+const DEMO = {
+  admin:       {name:"John Kamau",      id:"ADM001",         dept:"Administration",   role:"Admin",       icon:"🏛️"},
+  principal:   {name:"Patrick Muriithi",id:"PRI001",         dept:"Leadership",       role:"Principal",   icon:"👔"},
+  teacher:     {name:"Grace Wanjiku",   id:"TCH023",         dept:"Mathematics",      role:"Teacher",     icon:"📚"},
+  hod:         {name:"David Ochieng",   id:"HOD005",         dept:"Sciences",         role:"HOD",         icon:"🎓"},
+  librarian:   {name:"Faith Njeri",     id:"LIB001",         dept:"Library",          role:"Librarian",   icon:"📖"},
+  storekeeper: {name:"Peter Mwangi",    id:"STR001",         dept:"Stores",           role:"Storekeeper", icon:"🏪"},
+  ict:         {name:"James Kariuki",   id:"ICT001",         dept:"ICT",              role:"ICT Admin",   icon:"💻"},
+  student:     {name:"Amina Hassan",    id:"KT2024/F/012",   dept:"Form 3 – Stream A",role:"Student",     icon:"🧑‍🎓"},
+};
+let selectedRole = null;
+
+function selectRole(key, el) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole = key;
+}
+
+function goStep2() {
+  if (!selectedRole) { showToast('Please select your role first', 'warning'); return; }
+  const d = DEMO[selectedRole];
+  document.getElementById('step-1').style.display = 'none';
+  document.getElementById('step-2').style.display = 'block';
+  document.getElementById('preview-icon').textContent  = d.icon;
+  document.getElementById('preview-name').textContent  = d.name;
+  document.getElementById('preview-id').textContent    = d.id + ' · KTSSD';
+  document.getElementById('preview-dept').textContent  = d.dept;
+  document.getElementById('preview-role-badge').textContent = d.role;
+  document.getElementById('inp-username').value        = d.id;
+  document.getElementById('inp-role').value            = selectedRole;
+}
+
+function goStep1() {
+  document.getElementById('step-2').style.display = 'none';
+  document.getElementById('step-1').style.display = 'block';
+}
+</script>
+</body>
+</html>
